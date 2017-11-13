@@ -1,4 +1,4 @@
-import random
+import os, random
 
 deck = [
 		{'name': '4', 'suit':'Spades','clean deck':False,'value':1},
@@ -46,8 +46,24 @@ deck = [
 		{'name': '3', 'suit':'Diamonds','clean deck':True,'value':10},
 		]
 
-rules = {'clean deck': True}
+rules = {
+		'clean deck': False,
+		'players': 4,
+		'teams': 2,
+		'tricks': 3,  # Number of tricks per round. Equal to number of cards dealt per player
+		'win_points': 12, # Number of points in order to win the game
+		}
 
+class Player():
+	def __init__(self,name,team=1):
+		self.name = name
+		self.team = team
+		self.cards = []
+
+class Team():
+	def __init__(self,team_name):
+		self.points = 0
+		self.name = team_name
 
 def shuffle(ordered_list,seed=None):
 	""" Shuffles a list"""
@@ -60,25 +76,38 @@ def shuffle(ordered_list,seed=None):
 	return(shuffled_list)
 
 def draw_cards(cards, show_cards=False):
-	#Draw the cards among the players
-	player1_cards = []
-	player2_cards = []
-	player3_cards = []
-	player4_cards = []
-	for i in range(3):
-		player1_cards.append(cards[0+i])
-		player2_cards.append(cards[3+i])
-		player3_cards.append(cards[6+i])
-		player4_cards.append(cards[9+i])
-	#Draw the trump card
-	trump_card_name = trump_card(cards,cards[12])
+	"""Draw the cards among the players
+	Arguments:
+		show_cards: set True to print all players hands, False to print only player 1 hand
+	"""
+	#Clean up previous round hands
+	for player in players:
+		player.cards = []
+		
+	k = 0 #Card counter
+	for i in range(rules['tricks']):
+		for player in players:
+			player.cards.append(cards[k])
+			k= k+1
 	
-	print('Your deck:', end="")
-	for cards in player1_cards:
-		print('\n\t',cards['name'],'of',cards['suit'], end="")
-		if cards['name']==trump_card_name:
-			print(' (trump card!)', end="")
-	print('\n')
+	#Draw the trump card
+	trump_card_name = trump_card(cards,cards[k])
+	if show_cards:
+		for player in players:
+			print(player.name,"hand:")
+			for i,cards in enumerate(player.cards):
+				print('\n\t',i+1,'-',cards['name'],'of',cards['suit'], end="")
+				if cards['name']==trump_card_name:
+					print(' (trump card!)', end="")
+			print('\n')
+	else:
+		print(players[0].name,"hand:")
+		for i,cards in enumerate(players[0].cards):
+			print('\n\t',i+1,'-',cards['name'],'of',cards['suit'], end="")
+			if cards['name']==trump_card_name:
+				print(' (trump card!)', end="")
+		print('\n')
+	return()
 
 
 def trump_card(cards,revealed_card):
@@ -96,8 +125,8 @@ def trump_card(cards,revealed_card):
 	if revealed_card['name']=='3' and rules['clean deck']==False: 	trump_card = '4'
 	if revealed_card['name']=='3' and rules['clean deck']==True: 	trump_card = 'Queen'
 
-	print('The revealed card:',revealed_card['name'],'of',revealed_card['suit'])
-	print('The trump card:',trump_card,'\n')
+	print('Revealed card:',revealed_card['name'],'of',revealed_card['suit'])
+	print('Trump card:',trump_card,'\n')
 
 	for card in cards:
 		if card['name']==trump_card:
@@ -107,7 +136,17 @@ def trump_card(cards,revealed_card):
 			if card['suit']=='Diamonds':card['value']=96
 	return(trump_card)
 
+def score():
+	""" Print score"""
+	print('Current score:')
+	for i, team in enumerate(teams):
+		print("\t",team.name,":",team.points,"points")
+	print('\n')
+
+
 if __name__ == "__main__":
+
+	#Create the deck of cards
 	if rules['clean deck']==False:
 		game_deck = deck
 	else:
@@ -115,6 +154,35 @@ if __name__ == "__main__":
 		for card in deck:
 			if card['clean deck']==True:
 				game_deck.append(card)
+
+	# Create the teams
+	teams = []
+	for i in range(rules['teams']):
+		name = 'Team '+str(i+1)
+		teams.append(Team(name))
 	
-	round_deck = shuffle(game_deck)
-	draw_cards(round_deck)
+	#Create the players
+	players = []
+	for i in range(rules['players']):
+		name = 'Player '+str(i+1)
+		players.append(Player(name))
+
+	#Check the team with highest points:
+	max_points = -1
+	leading_team = None
+	for i, team in enumerate(teams):
+		if team.points > max_points:
+			max_points = team.points
+			leading_team = team.name
+	
+	i = 0
+	while(max_points<rules['win_points']): #The main loop of the game
+		os.system('cls')
+		print('Round ',i,'\n')
+		score() 
+		round_deck = shuffle(game_deck)
+		draw_cards(round_deck,True)
+		#input()
+		max_points = max_points+1
+		i = i+1
+
