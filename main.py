@@ -4,6 +4,19 @@ from cards import *
 player_config = None
 team_names = None
 
+rules = { #Default rules
+	'clean deck': False,
+	'players': 4,
+	'show all hands': False, #True if you want to print the hands of all players, False for human players only
+	'tricks': 3,  # Number of tricks per round. Equal to number of cards dealt per player
+	'win_points': 12, # Number of points in order to win the game
+	}
+
+player_config = [ #Default players
+		{'name': 'Foo','human':False,'team':'Team 1'},
+		{'name': 'Bar','human':False,'team':'Team 2'},
+		]
+
 class Player():
 	def __init__(self,name,team_name='Team 1',human=True):
 		self.human = human
@@ -325,14 +338,6 @@ def turn_order(list_name,n):
 	return(rotated_list)
 
 if __name__ == "__main__":
-
-	rules = {
-		'clean deck': False,
-		'players': 4,
-		'show all hands': False, #True if you want to print the hands of all players, False for human players only
-		'tricks': 3,  # Number of tricks per round. Equal to number of cards dealt per player
-		'win_points': 12, # Number of points in order to win the game
-		}
 
 	player_config = [
 		{'name': 'Foo','human':False,'team':'Team 1'},
